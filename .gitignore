@@ -1,1 +1,9 @@
+
+# .gitignore
+__pycache__/
+*.pyc
 .env
+.adk/
+.venv/
+.DS_Store
+
