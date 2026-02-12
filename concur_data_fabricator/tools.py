@@ -1,27 +1,8 @@
 import uuid
 import random
 from datetime import datetime
-from typing import TypedDict, List
-
-
-# =========================
-# DATA MODELS (STRICT)
-# =========================
-
-class Persona(TypedDict):
-    employee_id: str
-    name: str
-    role: str
-    grade: str
-    dept: str
-    risk_appetite: str
-
-
-class Policy(TypedDict):
-    meal_limit: float
-    hotel_limit: float
-    currency: str
-
+import json
+from typing import List, TypedDict
 
 class ExpenseItem(TypedDict):
     expense_id: str
@@ -32,44 +13,19 @@ class ExpenseItem(TypedDict):
     date: str
     vendor: str
     is_fraudulent: bool
-
-
-class ApprovalResult(TypedDict):
-    report_status: str
-    total_items: int
-    audit_flags: int
-    comments: str
-
-
-# =========================
-# 1. PERSONA TOOL
-# =========================
-
-def generate_persona(role: str = "Sales") -> Persona:
+# --- 1. HR & POLICY TOOLS (Used by HR_Policy_Expert) ---
+def generate_persona(role: str = "Sales"):
+    """Generates an employee profile for the synthetic scenario."""
     profiles = {
         "Sales": {"grade": "T3", "dept": "Global_Sales", "risk_appetite": "Medium"},
         "Executive": {"grade": "E2", "dept": "Strategy", "risk_appetite": "Low"},
-        "Consultant": {"grade": "C4", "dept": "Delivery", "risk_appetite": "High"},
+        "Intern": {"grade": "I1", "dept": "Research", "risk_appetite": "High"}
     }
-
     profile = profiles.get(role, profiles["Sales"])
     emp_id = f"EMP-{uuid.uuid4().hex[:4].upper()}"
+    return {"employee_id": emp_id, "role": role, **profile}
 
-    return {
-        "employee_id": emp_id,
-        "name": f"Synthetic_User_{emp_id}",
-        "role": role,
-        "grade": profile["grade"],
-        "dept": profile["dept"],
-        "risk_appetite": profile["risk_appetite"],
-    }
-
-
-# =========================
-# 2. POLICY TOOL
-# =========================
-
-def get_policy_constraints(country_code: str = "US") -> Policy:
+def get_policy_constraints(country_code: str = "US"):
     policies = {
         "US": {"meal_limit": 75.0, "hotel_limit": 350.0, "currency": "USD"},
         "DE": {"meal_limit": 60.0, "hotel_limit": 250.0, "currency": "EUR"},
@@ -77,11 +33,22 @@ def get_policy_constraints(country_code: str = "US") -> Policy:
     }
     return policies.get(country_code, policies["US"])
 
-
-# =========================
-# 3. EXPENSE GENERATOR TOOL
-# =========================
-
+# --- 2. FABRICATION TOOLS (Used by Data_Fabricator) ---
+# def create_synthetic_expense(emp_id: str, policy: dict, category: str = "Meal"):
+#     """Creates a realistic line item near the policy limit."""
+#     limit = policy.get(f"{category.lower()}_limit", 100.0)
+#     actual_amount = round(random.uniform(limit * 0.7, limit * 1.1), 2)
+#     return {
+#         "expense_id": f"EXP-{uuid.uuid4().hex[:6].upper()}",
+#         "employee_id": emp_id,
+#         "category": category,
+#         "amount": actual_amount,
+#         "currency": policy["currency"],
+#         "vendor": f"Mock_{category}_Vendor",
+#         "has_receipt": True,
+#         "is_fraudulent": False
+#     }
+# def create_synthetic_expense(emp_id: str, policy: dict, category: str = "Meal", amount: float = None, force_over_limit: bool = False):
 def create_synthetic_expense(
     emp_id: str,
     meal_limit: float,
@@ -103,11 +70,6 @@ def create_synthetic_expense(
         "vendor": f"Mock_{category}_Vendor_Inc",
         "is_fraudulent": False,
     }
-
-# =========================
-# 4. FRAUD SIMULATION TOOL
-# =========================
-
 def inject_fraud_pattern(
     expense_id: str,
     employee_id: str,
@@ -151,13 +113,18 @@ def inject_fraud_pattern(
 
     return [base_expense]
 
+# --- 3. VENDOR TOOLS (Used by Vendor_Verifier) ---
+def verify_vendor_status(vendor_name: str, country: str):
+    """Checks merchant legitimacy."""
+    blacklisted = ["Shadow_Shell_Corp", "Dark_Kitchen_Ltd"]
+    is_verified = vendor_name not in blacklisted
+    return {
+        "vendor": vendor_name, 
+        "is_verified": is_verified, 
+        "vendor_risk": "Low" if is_verified else "Critical"
+    }
 
-# =========================
-# 5. APPROVAL WORKFLOW TOOL
-# =========================
-
-from typing import List
-
+# --- 4. AUDIT TOOLS (Used by Finance_Auditor) ---
 def process_approval_workflow(expense_ids: List[str], is_fraud_detected: bool = False):
     """
     Simulates the final approval gate for a batch of synthetic expenses.
@@ -170,9 +137,26 @@ def process_approval_workflow(expense_ids: List[str], is_fraud_detected: bool = 
         return {"status": "error", "message": "No IDs provided."}
 
     status = "REJECTED" if is_fraud_detected else "APPROVED"
-    
+
     return {
         "report_status": status,
         "processed_count": len(expense_ids),
         "audit_note": "Policy breach detected." if is_fraud_detected else "Clean report."
     }
+# --- 5. RISK TOOLS (Used by Risk_Strategist) ---
+def calculate_expense_risk(audit_results: dict, vendor_results: dict, role: str):
+    """The final brain. Calculates 0-100% risk."""
+    risk_score = 0
+    
+    # Logic Penalties
+    if not audit_results.get("audit_passed"): risk_score += 0
+    if vendor_results.get("vendor_risk") == "Critical": risk_score += 50
+    if role == "Intern" and not audit_results.get("audit_passed"): risk_score += 10
+    
+    risk_score = min(risk_score, 100)
+    
+    # Threshold Logic
+    if risk_score > 70: decision = "Manual Review"
+    else: decision = "Approved"
+
+    return {"risk_percent": risk_score, "decision": decision, "summary": f"Risk Score: {risk_score}%"}
