@@ -62,8 +62,7 @@ and produce enterprise-grade audit decisions — all on synthetic data.
 │     ↳ risk score 0-100                 │     │
 │                                        ▼     │
 │  🔵 Audit & Escalation                       │
-│     ↳ AUTO_APPROVED / MANUAL_REVIEW /        │
-│       ESCALATED                              │
+│     ↳ APPROVED / REJECTED                    │
 └──────────────────────────────────────────────┘
 ```
 
@@ -106,9 +105,9 @@ and produce enterprise-grade audit decisions — all on synthetic data.
 | Score | Level | Action |
 |-------|-------|--------|
 | 0-24 | 🟢 LOW | ✅ Auto-approved |
-| 25-49 | 🟡 MEDIUM | 👤 Route to manager |
-| 50-74 | 🟠 HIGH | 🏦 Finance review, hold payment |
-| 75-100 | 🔴 CRITICAL | 🚨 Compliance escalation |
+| 25-49 | 🟡 MEDIUM | ❌ Reject, request evidence |
+| 50-74 | 🟠 HIGH | ❌ Reject, hold payment, investigate |
+| 75-100 | 🔴 CRITICAL | ❌ Reject immediately, suspend payment |
 
 ---
 
@@ -124,15 +123,15 @@ Agent 2 → Parsed 7 receipts (6 original + 1 duplicate)
           Classified: 2 Airline, 2 Restaurant, 1 Hotel, 1 Transport, 1 Other
           Flagged: 1 HIGH_VALUE, 1 WEEKEND
 
-Agent 3 → Policy validation: 4 APPROVED, 2 NEEDS_REVIEW, 1 REJECTED
+Agent 3 → Policy validation: 4 APPROVED, 3 REJECTED
           Violation: $187.50 meal exceeds $75 limit
           Compliance rate: 57.1%
 
 Agent 4 → Risk Score: 52/100 (HIGH)
           Signals: 1 duplicate receipt, 1 amount inflation, 1 policy violation
 
-Agent 5 → Decision: ⚠️ MANUAL REVIEW
-          Action: Route to Finance, hold payment, request docs
+Agent 5 → Decision: ❌ REJECTED
+          Action: Hold payment, notify employee/manager, investigate
 ```
 
 ---

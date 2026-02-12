@@ -94,8 +94,7 @@ A **multi-agent AI system** where 5 specialized agents **communicate with each o
                                            │
                     ┌──────────────────────▼───────────────────────┐
                     │  📋 Final Audit Report                       │
-                    │  Decision: AUTO_APPROVED / MANUAL_REVIEW /   │
-                    │            ESCALATED                          │
+                    │  Decision: APPROVED / REJECTED               │
                     └──────────────────────────────────────────────┘
 ```
 
@@ -174,7 +173,7 @@ This is **not** just sequential API calls. Agents genuinely communicate:
 
 **Validation Rules**: Amount limits · Weekend claims · Category restrictions · Suspicious vendor keywords · Receipt thresholds
 
-**Outcomes**: `APPROVED` (0 violations) · `NEEDS_REVIEW` (1 violation) · `REJECTED` (2+ violations)
+**Outcomes**: `APPROVED` (0 violations) · `REJECTED` (1+ violations)
 
 ---
 
@@ -201,7 +200,7 @@ This is **not** just sequential API calls. Agents genuinely communicate:
 | `make_audit_decision()` | Tiered decision engine with specific action items per tier |
 | `generate_audit_report()` | Produces professional structured audit report |
 
-**Decisions**: `AUTO_APPROVED` · `MANUAL_REVIEW` · `ESCALATED`
+**Decisions**: `APPROVED` · `REJECTED`
 
 ---
 
@@ -230,19 +229,19 @@ Risk Score = Σ(weighted signals), capped at 100
 
 | Score | Level | Visual | Decision | Action |
 |-------|-------|--------|----------|--------|
-| 0–24 | 🟢 LOW | ██░░░ | AUTO_APPROVED | Process reimbursement, archive |
-| 25–49 | 🟡 MEDIUM | ███░░ | MANUAL_REVIEW | Route to manager, request docs |
-| 50–74 | 🟠 HIGH | ████░ | MANUAL_REVIEW | Finance team review, hold payment |
-| 75–100 | 🔴 CRITICAL | █████ | ESCALATED | Compliance Officer, suspend payment, investigate |
+| 0–24 | 🟢 LOW | ██░░░ | APPROVED | Process reimbursement, archive |
+| 25–49 | 🟡 MEDIUM | ███░░ | REJECTED | Reject and request supporting evidence |
+| 50–74 | 🟠 HIGH | ████░ | REJECTED | Reject, hold payment, investigate |
+| 75–100 | 🔴 CRITICAL | █████ | REJECTED | Reject immediately, suspend payment, investigate |
 
 ### Example Scenarios
 
 | Scenario | Expected Score | Decision |
 |----------|---------------|----------|
-| Clean report, 5 items, all within limits | 0 | ✅ AUTO_APPROVED |
-| 1 inflated meal + 1 weekend claim | 15 | ✅ AUTO_APPROVED |
-| 2 duplicate receipts + 1 policy violation | 50 | ⚠️ MANUAL_REVIEW |
-| 3 duplicates + suspicious vendor + 2 violations | 86 | 🚨 ESCALATED |
+| Clean report, 1 item, within limits | 0 | ✅ APPROVED |
+| 1 inflated meal + 1 weekend claim | 15 | ✅ APPROVED |
+| 2 duplicate receipts + 1 policy violation | 50 | ❌ REJECTED |
+| 3 duplicates + suspicious vendor + 2 violations | 86 | ❌ REJECTED |
 
 ---
 
@@ -334,17 +333,17 @@ GOOGLE_API_KEY=your-api-key
 adk run concur_shield
 
 # Web UI (recommended for demo)
-adk web concur_shield
+adk web .
 ```
 
 ### Sample Prompts
 
 | Prompt | Pipeline Behavior |
 |--------|-------------------|
-| "Generate a synthetic expense report for a US Sales exec" | Clean scenario → likely AUTO_APPROVED |
+| "Generate exactly 1 synthetic expense for a US Sales exec" | Clean scenario → likely APPROVED |
 | "Create expenses with fraudulent entries" | Anomaly injection → higher risk score |
 | "Process expenses for a consultant in Germany with weekend claims" | DE policy + violations |
-| "Run a high-risk fraud simulation with duplicates" | Stress test → likely ESCALATED |
+| "Run a high-risk fraud simulation with duplicates" | Stress test → likely REJECTED |
 | "Generate 10 expense items for an Indian employee" | INR currency + IN policy limits |
 
 ---
@@ -356,7 +355,7 @@ adk web concur_shield
 | Feature | Description |
 |---------|------------|
 | **ParallelAgent** | Run Policy Compliance + Fraud Detection in parallel (both read from Agent 2) |
-| **Human-in-the-Loop** | Pause pipeline at MANUAL_REVIEW for human approval before continuing |
+| **Human-in-the-Loop** | Optional post-REJECTED reviewer workflow before final reimbursement action |
 | **Persistent State** | Use `DatabaseSessionService` for audit trail across sessions |
 | **Memory Service** | Enable agents to recall patterns from past expense reports |
 

@@ -279,8 +279,7 @@ graph LR
 
 **Status Determination**:
 - 0 violations → `APPROVED`
-- 1 violation → `NEEDS_REVIEW`
-- 2+ violations → `REJECTED`
+- 1+ violations → `REJECTED`
 
 ---
 
@@ -326,7 +325,7 @@ graph LR
 |-----------|----------|-------------|
 | Condition | Decision | Key Actions |
 |-----------|----------|-------------|
-| `risk_score ≥ 50` OR `rejected ≥ 1` OR `signals ≥ 2` OR `needs_review ≥ 2` | REJECTED | Rejected due to risk/compliance issues, payment suspended |
+| `risk_score ≥ 50` OR `rejected ≥ 1` OR `signals ≥ 2` | REJECTED | Rejected due to risk/compliance issues, payment suspended |
 | All else | APPROVED | Approved, process reimbursement |
 
 ---
@@ -427,7 +426,7 @@ Adds flags: WEEKEND, HIGH_VALUE, VERY_HIGH_VALUE, NON_BUSINESS, UNCLASSIFIED, IN
 Returns full policy config for region. Includes: meal/hotel/flight/taxi/per_diem/mileage/misc limits, weekend/entertainment rules, receipt thresholds, max daily total.
 
 #### `validate_expense(expense_id, category, amount, currency, date, vendor, is_weekend, region, vendor_category) → dict`
-Runs 5 validation checks. Returns status (APPROVED/NEEDS_REVIEW/REJECTED), violations list, applicable limit, and actual amount.
+Runs 5 validation checks. Returns status (APPROVED/REJECTED), violations list, applicable limit, and actual amount.
 
 ### Agent 4 Tools
 
@@ -533,7 +532,7 @@ pip3 install google-adk
 adk run concur_shield
 
 # Web UI (port 8000)
-adk web concur_shield
+adk web .
 ```
 
 ---
