@@ -30,7 +30,7 @@ ConcurShield AI is a multi-agent expense intelligence simulator built on **Googl
 | Supported regions | 5 (US, DE, IN, UK, SG) |
 | Vendor categories | 9 classifications |
 | Risk score range | 0–100 (weighted) |
-| Decision tiers | 3 (AUTO_APPROVED, MANUAL_REVIEW, ESCALATED) |
+| Decision tiers | 2 (APPROVED, REJECTED) |
 
 ---
 
@@ -324,10 +324,10 @@ graph LR
 
 | Condition | Decision | Key Actions |
 |-----------|----------|-------------|
-| `risk_score ≥ 75` OR `rejected ≥ 3` | ESCALATED | Compliance officer, suspend payment, investigate |
-| `risk_score ≥ 50` OR `rejected ≥ 1` OR `signals ≥ 2` | MANUAL_REVIEW | Finance review, hold payment, request docs |
-| `risk_score ≥ 25` OR `needs_review ≥ 2` | MANUAL_REVIEW | Manager approval, clarification |
-| All else | AUTO_APPROVED | Process reimbursement, archive |
+| Condition | Decision | Key Actions |
+|-----------|----------|-------------|
+| `risk_score ≥ 50` OR `rejected ≥ 1` OR `signals ≥ 2` OR `needs_review ≥ 2` | REJECTED | Rejected due to risk/compliance issues, payment suspended |
+| All else | APPROVED | Approved, process reimbursement |
 
 ---
 

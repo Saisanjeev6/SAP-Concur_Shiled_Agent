@@ -186,13 +186,8 @@ def validate_expense(
             f"SUSPICIOUS_VENDOR: '{vendor}' contains restricted keywords"
         )
 
-    # Determine final status
-    if len(violations) >= 2:
-        status = "REJECTED"
-    elif len(violations) == 1:
-        status = "NEEDS_REVIEW"
-    else:
-        status = "APPROVED"
+    # Binary policy outcome: any violation means REJECTED.
+    status = "REJECTED" if violations else "APPROVED"
 
     return {
         "expense_id": expense_id,

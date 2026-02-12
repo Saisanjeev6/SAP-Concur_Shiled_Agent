@@ -14,12 +14,12 @@ def consolidate_findings(
     total_amount: float,
     currency: str,
     policy_approved: int,
-    policy_needs_review: int,
     policy_rejected: int,
     policy_violations: List[str],
     fraud_risk_score: int,
     fraud_risk_level: str,
     fraud_signals: List[str],
+    policy_needs_review: int = 0,
 ) -> dict:
     """
     Consolidates all findings from Policy Compliance and Fraud Detection into a unified view.
@@ -31,7 +31,7 @@ def consolidate_findings(
         total_amount: Total expense amount.
         currency: Currency code.
         policy_approved: Number of items approved by policy check.
-        policy_needs_review: Number of items needing review.
+        policy_needs_review: Deprecated in binary mode; retained for compatibility.
         policy_rejected: Number of items rejected.
         policy_violations: List of violation descriptions.
         fraud_risk_score: Fraud risk score (0-100).
@@ -41,7 +41,7 @@ def consolidate_findings(
     Returns:
         Consolidated findings summary.
     """
-    total_issues = policy_needs_review + policy_rejected + len(fraud_signals)
+    total_issues = policy_rejected + len(fraud_signals)
 
     # Calculate compliance rate
     compliance_rate = round(
@@ -58,7 +58,6 @@ def consolidate_findings(
         },
         "policy_summary": {
             "approved": policy_approved,
-            "needs_review": policy_needs_review,
             "rejected": policy_rejected,
             "compliance_rate": f"{compliance_rate}%",
             "violations": policy_violations,
@@ -81,11 +80,11 @@ def make_audit_decision(
     total_amount: float,
     total_expenses: int,
     policy_rejected: int,
-    policy_needs_review: int,
     fraud_risk_score: int,
     fraud_risk_level: str,
     total_violations: int,
     total_fraud_signals: int,
+    policy_needs_review: int = 0,
 ) -> dict:
     """
     Makes the final audit decision based on consolidated findings.
@@ -95,7 +94,7 @@ def make_audit_decision(
         total_amount: Total expense amount.
         total_expenses: Number of expense items.
         policy_rejected: Number of policy-rejected items.
-        policy_needs_review: Number of items needing review.
+        policy_needs_review: Deprecated in binary mode; retained for compatibility.
         fraud_risk_score: Fraud risk score (0-100).
         fraud_risk_level: Fraud risk level.
         total_violations: Total number of policy violations.
@@ -106,36 +105,20 @@ def make_audit_decision(
     """
     action_items = []
 
-    # Decision logic
-    if fraud_risk_score >= 75 or policy_rejected >= 3:
-        decision = "ESCALATED"
+    # Binary decision logic.
+    if fraud_risk_score >= 50 or policy_rejected >= 1 or total_fraud_signals >= 2:
+        decision = "REJECTED"
         action_items.extend([
-            "🚨 ESCALATE to Compliance Officer immediately",
-            "🔒 Suspend all reimbursement payments",
-            "📋 Initiate formal investigation",
-            "📧 Notify employee's VP-level manager",
-            "🗂️ Preserve all supporting documentation",
-        ])
-    elif fraud_risk_score >= 50 or policy_rejected >= 1 or total_fraud_signals >= 2:
-        decision = "MANUAL_REVIEW"
-        action_items.extend([
-            "👤 Route to Finance team for manual review",
-            "⏸️ Hold payment pending review",
-            "📝 Request additional documentation from employee",
-            "📊 Flag for trend analysis",
-        ])
-    elif fraud_risk_score >= 25 or policy_needs_review >= 2:
-        decision = "MANUAL_REVIEW"
-        action_items.extend([
-            "👤 Route to direct manager for approval",
-            "📝 Request clarification on flagged items",
+            "❌ Rejected due to risk/policy violations",
+            "🔒 Payment suspended",
+            "📧 Notification sent to employee and manager",
         ])
     else:
-        decision = "AUTO_APPROVED"
+        decision = "APPROVED"
         action_items.extend([
-            "✅ Auto-approved — no issues detected",
-            "💰 Process reimbursement",
-            "📁 Archive for quarterly audit",
+            "✅ Approved — no significant issues detected",
+            "💰 Process reimbursement immediately",
+            "📁 Archive for audit trail",
         ])
 
     return {
@@ -178,7 +161,7 @@ def generate_audit_report(
         department: Employee department.
         region: Employee region.
         report_id: Audit report ID.
-        decision: Final decision (AUTO_APPROVED/MANUAL_REVIEW/ESCALATED).
+        decision: Final decision (APPROVED/REJECTED).
         total_amount: Total expense amount.
         currency: Currency code.
         total_items: Number of expense items.
@@ -194,9 +177,8 @@ def generate_audit_report(
     """
     # Decision emoji
     decision_indicator = {
-        "AUTO_APPROVED": "✅ AUTO-APPROVED",
-        "MANUAL_REVIEW": "⚠️ MANUAL REVIEW REQUIRED",
-        "ESCALATED": "🚨 ESCALATED TO COMPLIANCE",
+        "APPROVED": "✅ APPROVED",
+        "REJECTED": "❌ REJECTED",
     }
 
     return {

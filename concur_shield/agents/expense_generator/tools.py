@@ -50,7 +50,7 @@ def generate_expense_report(
     employee_id: str,
     employee_name: str,
     region: str = "US",
-    num_items: int = 5,
+    num_items: int = 1,
     include_anomalies: bool = False,
     trip_purpose: str = "Client Meeting",
 ) -> dict:
@@ -132,13 +132,13 @@ def generate_expense_report(
                 expense_items[idx]["description"] = f"[INFLATED] {expense_items[idx]['description']}"
 
             elif anomaly == "duplicate":
-                # Create a near-duplicate
-                dup = expense_items[idx].copy()
-                dup["expense_id"] = generate_expense_id()
-                dup["receipt_number"] = expense_items[idx]["receipt_number"]  # Same receipt!
-                dup["is_anomaly"] = True
-                dup["anomaly_type"] = "duplicate"
-                expense_items.append(dup)
+                # Keep report size stable: reuse an existing second item and copy receipt number.
+                target_indices = [i for i in range(len(expense_items)) if i != idx]
+                if target_indices:
+                    target_idx = random.choice(target_indices)
+                    expense_items[target_idx]["receipt_number"] = expense_items[idx]["receipt_number"]
+                    expense_items[target_idx]["is_anomaly"] = True
+                    expense_items[target_idx]["anomaly_type"] = "duplicate"
 
             elif anomaly == "out_of_policy":
                 expense_items[idx]["category"] = "Misc"

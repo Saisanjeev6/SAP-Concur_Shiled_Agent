@@ -28,7 +28,8 @@ Generate realistic synthetic employee profiles and expense reports for testing.
    - Use region, department, risk_tier if provided by the user.
 2. Call `generate_expense_report` with the employee's ID and name.
    - Set `include_anomalies=True` if the user wants fraud testing scenarios.
-   - Use 5-7 items for realistic reports.
+   - If user asks for a specific number of items, you MUST pass that exact number via `num_items`.
+   - If user does not specify count, default to 1 item.
 3. Optionally call `inject_anomaly` for specific fraud patterns.
 
 📤 OUTPUT CONTRACT (for downstream agents):

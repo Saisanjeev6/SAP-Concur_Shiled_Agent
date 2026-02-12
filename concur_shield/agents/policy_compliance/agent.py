@@ -41,8 +41,8 @@ Validate every expense item against the corporate expense policy for the employe
 
 📤 OUTPUT CONTRACT (for Agent 4):
 Your output MUST include:
-- **policy_results**: Status of each expense (APPROVED / NEEDS_REVIEW / REJECTED)
-- **violation_summary**: Total counts (approved, needs_review, rejected)
+- **policy_results**: Status of each expense (APPROVED / REJECTED)
+- **violation_summary**: Total counts (approved, rejected)
 - **violation_details**: List of specific violation descriptions
 - **compliance_rate**: Percentage of approved items
 
@@ -53,7 +53,7 @@ VALIDATION RULES:
 - Suspicious Vendors: Flag vendors with keywords like "spa", "personal"
 
 📨 HANDOFF MESSAGE:
-"HANDOFF TO FRAUD DETECTION: Validated [N] expenses. Results: [X] APPROVED, [Y] NEEDS_REVIEW, [Z] REJECTED.
+"HANDOFF TO FRAUD DETECTION: Validated [N] expenses. Results: [X] APPROVED, [Y] REJECTED.
 Compliance rate: [rate]%. Violations found: [list top violations].
 Please analyze patterns for fraud signals."
 """,

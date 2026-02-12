@@ -52,15 +52,13 @@ Your output MUST include:
 - **recommendation**: Action recommendation text
 
 RISK SCORING:
-- 0-24 (LOW): Auto-approve
-- 25-49 (MEDIUM): Route to manager
-- 50-74 (HIGH): Finance review, hold payment
-- 75-100 (CRITICAL): Escalate to Compliance
+- 0-24 (LOW): Recommend APPROVED
+- 25-100 (MEDIUM/HIGH/CRITICAL): Recommend REJECTED
 
 📨 HANDOFF MESSAGE:
 "HANDOFF TO AUDIT & ESCALATION: Fraud analysis complete. Risk Score: [score]/100 ([level]).
 Signals detected: [N] (duplicates: X, velocity: Y, vendor: Z).
-Policy violations from Agent 3: [N]. Recommendation: [recommendation].
+Policy violations from Agent 3: [N]. Recommended decision: [APPROVED/REJECTED].
 Please make final audit decision."
 """,
     tools=[

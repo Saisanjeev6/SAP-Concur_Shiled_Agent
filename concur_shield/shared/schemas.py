@@ -55,7 +55,7 @@ class ReceiptData(TypedDict):
 class PolicyResult(TypedDict):
     """Policy validation result from Agent 3."""
     expense_id: str
-    status: str  # APPROVED, REJECTED, NEEDS_REVIEW
+    status: str  # APPROVED, REJECTED
     violations: List[str]
     applicable_limit: float
     actual_amount: float
@@ -85,7 +85,7 @@ class AuditDecision(TypedDict):
     """Final audit decision from Agent 5."""
     employee_id: str
     report_id: str
-    decision: str  # AUTO_APPROVED, MANUAL_REVIEW, ESCALATED
+    decision: str  # APPROVED, REJECTED
     total_amount: float
     total_items: int
     policy_violations: int

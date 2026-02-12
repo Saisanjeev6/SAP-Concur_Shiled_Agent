@@ -227,16 +227,20 @@ def compute_risk_score(
     # Determine risk level
     if score >= 75:
         risk_level = "CRITICAL"
-        recommendation = "ESCALATE immediately to Compliance Officer. Suspend reimbursement."
+        recommendation = "REJECTED: Critical fraud risk detected. Suspend reimbursement and investigate immediately."
+        recommended_decision = "REJECTED"
     elif score >= 50:
         risk_level = "HIGH"
-        recommendation = "Flag for manual review by Finance team. Hold payment pending investigation."
+        recommendation = "REJECTED: High fraud risk detected. Hold payment pending investigation."
+        recommended_decision = "REJECTED"
     elif score >= 25:
         risk_level = "MEDIUM"
-        recommendation = "Route to manager for additional approval. Request documentation."
+        recommendation = "REJECTED: Medium fraud risk detected. Require investigation before any reimbursement."
+        recommended_decision = "REJECTED"
     else:
         risk_level = "LOW"
-        recommendation = "Auto-approve. No significant fraud indicators detected."
+        recommendation = "APPROVED: No significant fraud indicators detected."
+        recommended_decision = "APPROVED"
 
     return {
         "employee_id": employee_id,
@@ -252,4 +256,5 @@ def compute_risk_score(
         "total_amount_reviewed": total_amount,
         "num_expenses_reviewed": num_expenses,
         "recommendation": recommendation,
+        "recommended_decision": recommended_decision,
     }
